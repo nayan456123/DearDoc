@@ -1,0 +1,9 @@
+{
+  "name": "lucent-medi-mitra-clone",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local clone of the deployed Medi Mitra frontend bundle.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
