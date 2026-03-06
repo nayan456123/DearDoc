@@ -1,9 +1,15 @@
 {
-  "name": "lucent-medi-mitra-clone",
+  "name": "lucent-care-operations",
   "private": true,
-  "version": "1.0.0",
-  "description": "Local clone of the deployed Medi Mitra frontend bundle.",
+  "version": "2.0.0",
+  "description": "Django REST and React rebuild of Lucent telehealth operations.",
   "scripts": {
-    "start": "node server.js"
+    "backend": "python backend/manage.py runserver",
+    "frontend": "npm --prefix frontend run dev",
+    "migrate": "python backend/manage.py migrate",
+    "seed": "python backend/manage.py seed_demo",
+    "test:backend": "python backend/manage.py test operations",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint"
   }
 }
