@@ -1,12 +1,10 @@
 from django.contrib import admin
 
-from .models import Appointment, CareTask, Clinic, Clinician, IntakeRequest, OperationalSignal, Patient, UserProfile
+from .models import Appointment, AvailabilitySlot, CallSignal, DoctorProfile, PatientProfile, UserProfile
 
 admin.site.register(UserProfile)
-admin.site.register(Clinic)
-admin.site.register(Clinician)
-admin.site.register(Patient)
-admin.site.register(IntakeRequest)
+admin.site.register(DoctorProfile)
+admin.site.register(PatientProfile)
+admin.site.register(AvailabilitySlot)
 admin.site.register(Appointment)
-admin.site.register(CareTask)
-admin.site.register(OperationalSignal)
+admin.site.register(CallSignal)

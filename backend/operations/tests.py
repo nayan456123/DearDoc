@@ -11,16 +11,34 @@ class OperationsApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-    def test_login_and_overview(self):
-        response = self.client.post(
+    def test_patient_can_get_triage_preview(self):
+        login = self.client.post(
             '/api/auth/login/',
-            {'username': 'ops.lead', 'password': 'CommandCenter@123'},
+            {'username': 'patient.asha', 'password': 'Patient@123'},
+            format='json',
+        )
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {login.data['token']}")
+        response = self.client.post(
+            '/api/triage/preview/',
+            {
+                'concern': 'Shortness of breath',
+                'symptoms': 'Cough and breathlessness after walking',
+                'notes': 'Started yesterday',
+            },
             format='json',
         )
         self.assertEqual(response.status_code, 200)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {response.data['token']}")
+        self.assertIn('triage_score', response.data)
+        self.assertIn('suggestedSlots', response.data)
 
-        overview = self.client.get('/api/overview/')
-        self.assertEqual(overview.status_code, 200)
-        self.assertIn('summary', overview.data)
-        self.assertIn('appointments', overview.data)
+    def test_doctor_can_load_dashboard(self):
+        login = self.client.post(
+            '/api/auth/login/',
+            {'username': 'doctor.rao', 'password': 'Doctor@123'},
+            format='json',
+        )
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {login.data['token']}")
+        response = self.client.get('/api/doctor/dashboard/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('appointments', response.data)
+        self.assertIn('slots', response.data)
