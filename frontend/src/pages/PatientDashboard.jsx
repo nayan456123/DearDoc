@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { InlineError, SplashScreen, StatusPill } from '../components/UI'
+import { EmptyState, InlineError, SplashScreen, StatusPill } from '../components/UI'
 import { apiRequest } from '../lib/api'
 import { formatDateTime } from '../lib/formatters'
 import { useApiResource } from '../lib/useApiResource'
@@ -131,21 +131,28 @@ export function PatientDashboard({ token }) {
             </div>
           </div>
           <div className="slot-grid">
-            {data.availableSlots.map((slot) => (
-              <article key={slot.id} className="slot-card">
-                <strong>{formatDateTime(slot.starts_at)}</strong>
-                <p>{slot.doctor.user_profile.display_name}</p>
-                <span>{slot.label || 'Live consult slot'}</span>
-                <button
-                  type="button"
-                  className="ghost-button"
-                  disabled={bookingSlotId === slot.id || !concern || !symptoms}
-                  onClick={() => bookSlot(slot.id)}
-                >
-                  {bookingSlotId === slot.id ? 'Booking...' : 'Book this slot'}
-                </button>
-              </article>
-            ))}
+            {data.availableSlots.length ? (
+              data.availableSlots.map((slot) => (
+                <article key={slot.id} className="slot-card">
+                  <strong>{formatDateTime(slot.starts_at)}</strong>
+                  <p>{slot.doctor.user_profile.display_name}</p>
+                  <span>{slot.label || 'Live consult slot'}</span>
+                  <button
+                    type="button"
+                    className="ghost-button"
+                    disabled={bookingSlotId === slot.id || !concern || !symptoms}
+                    onClick={() => bookSlot(slot.id)}
+                  >
+                    {bookingSlotId === slot.id ? 'Booking...' : 'Book this slot'}
+                  </button>
+                </article>
+              ))
+            ) : (
+              <EmptyState
+                title="No slots available"
+                detail="The doctor has not opened any time slots yet. Ask the doctor to publish availability first."
+              />
+            )}
           </div>
         </section>
 
@@ -157,33 +164,40 @@ export function PatientDashboard({ token }) {
             </div>
           </div>
           <div className="meeting-list">
-            {data.appointments.map((appointment) => (
-              <article key={appointment.id} className="meeting-card">
-                <div className="row-between">
-                  <div>
-                    <strong>{appointment.doctor.user_profile.display_name}</strong>
-                    <span>{appointment.concern}</span>
+            {data.appointments.length ? (
+              data.appointments.map((appointment) => (
+                <article key={appointment.id} className="meeting-card">
+                  <div className="row-between">
+                    <div>
+                      <strong>{appointment.doctor.user_profile.display_name}</strong>
+                      <span>{appointment.concern}</span>
+                    </div>
+                    <StatusPill value={appointment.status} />
                   </div>
-                  <StatusPill value={appointment.status} />
-                </div>
-                <p>{appointment.copilot_summary}</p>
-                <footer>
-                  <span>{formatDateTime(appointment.starts_at)}</span>
-                  <span>{appointment.innovation_tag}</span>
-                </footer>
-                <div className="card-actions">
-                  {(appointment.status === 'confirmed' || appointment.status === 'live') ? (
-                    <button
-                      type="button"
-                      className="ghost-button"
-                      onClick={() => navigate(`/meeting/${appointment.id}`)}
-                    >
-                      Join meeting
-                    </button>
-                  ) : null}
-                </div>
-              </article>
-            ))}
+                  <p>{appointment.copilot_summary}</p>
+                  <footer>
+                    <span>{formatDateTime(appointment.starts_at)}</span>
+                    <span>{appointment.innovation_tag}</span>
+                  </footer>
+                  <div className="card-actions">
+                    {(appointment.status === 'confirmed' || appointment.status === 'live') ? (
+                      <button
+                        type="button"
+                        className="ghost-button"
+                        onClick={() => navigate(`/meeting/${appointment.id}`)}
+                      >
+                        Join meeting
+                      </button>
+                    ) : null}
+                  </div>
+                </article>
+              ))
+            ) : (
+              <EmptyState
+                title="No meetings booked"
+                detail="Generate a PulseMatch brief and book one of the doctor slots to create your first appointment."
+              />
+            )}
           </div>
         </section>
       </section>

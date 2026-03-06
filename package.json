@@ -5,7 +5,9 @@
   "description": "Django REST and React rebuild of Lucent telehealth operations.",
   "scripts": {
     "backend": "python backend/manage.py runserver",
+    "backend:lan": "python backend/manage.py runserver 0.0.0.0:8000",
     "frontend": "npm --prefix frontend run dev",
+    "frontend:lan": "npm --prefix frontend run dev -- --host 0.0.0.0",
     "migrate": "python backend/manage.py migrate",
     "seed": "python backend/manage.py seed_demo",
     "test:backend": "python backend/manage.py test operations",

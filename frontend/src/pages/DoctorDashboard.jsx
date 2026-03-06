@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { StatusPill, InlineError, MetricCard, SplashScreen } from '../components/UI'
+import { EmptyState, StatusPill, InlineError, MetricCard, SplashScreen } from '../components/UI'
 import { apiRequest } from '../lib/api'
 import { formatDateTime } from '../lib/formatters'
 import { useApiResource } from '../lib/useApiResource'
@@ -95,62 +95,69 @@ export function DoctorDashboard({ token }) {
                   <span>{data.appointments.filter((item) => item.status === column.key).length}</span>
                 </div>
                 <div className="kanban-stack">
-                  {data.appointments
-                    .filter((item) => item.status === column.key)
-                    .map((appointment) => (
-                      <article key={appointment.id} className="appointment-card">
-                        <div className="row-between">
-                          <div>
-                            <strong>{appointment.patient.user_profile.display_name}</strong>
-                            <span>{appointment.concern}</span>
+                  {data.appointments.filter((item) => item.status === column.key).length ? (
+                    data.appointments
+                      .filter((item) => item.status === column.key)
+                      .map((appointment) => (
+                        <article key={appointment.id} className="appointment-card">
+                          <div className="row-between">
+                            <div>
+                              <strong>{appointment.patient.user_profile.display_name}</strong>
+                              <span>{appointment.concern}</span>
+                            </div>
+                            <StatusPill value={appointment.urgency} />
                           </div>
-                          <StatusPill value={appointment.urgency} />
-                        </div>
-                        <p>{appointment.copilot_summary}</p>
-                        <footer>
-                          <span>{formatDateTime(appointment.starts_at)}</span>
-                          <span>Score {appointment.triage_score}</span>
-                        </footer>
-                        <div className="card-actions">
-                          {appointment.status === 'requested' ? (
-                            <button
-                              type="button"
-                              className="ghost-button"
-                              onClick={() => updateStatus(appointment.id, 'confirmed')}
-                            >
-                              Confirm
-                            </button>
-                          ) : null}
-                          {(appointment.status === 'confirmed' || appointment.status === 'live') ? (
-                            <button
-                              type="button"
-                              className="ghost-button"
-                              onClick={() => navigate(`/meeting/${appointment.id}`)}
-                            >
-                              Join room
-                            </button>
-                          ) : null}
-                          {appointment.status === 'confirmed' ? (
-                            <button
-                              type="button"
-                              className="ghost-button"
-                              onClick={() => updateStatus(appointment.id, 'live')}
-                            >
-                              Mark live
-                            </button>
-                          ) : null}
-                          {appointment.status === 'live' ? (
-                            <button
-                              type="button"
-                              className="ghost-button"
-                              onClick={() => updateStatus(appointment.id, 'completed')}
-                            >
-                              Complete
-                            </button>
-                          ) : null}
-                        </div>
-                      </article>
-                    ))}
+                          <p>{appointment.copilot_summary}</p>
+                          <footer>
+                            <span>{formatDateTime(appointment.starts_at)}</span>
+                            <span>Score {appointment.triage_score}</span>
+                          </footer>
+                          <div className="card-actions">
+                            {appointment.status === 'requested' ? (
+                              <button
+                                type="button"
+                                className="ghost-button"
+                                onClick={() => updateStatus(appointment.id, 'confirmed')}
+                              >
+                                Confirm
+                              </button>
+                            ) : null}
+                            {(appointment.status === 'confirmed' || appointment.status === 'live') ? (
+                              <button
+                                type="button"
+                                className="ghost-button"
+                                onClick={() => navigate(`/meeting/${appointment.id}`)}
+                              >
+                                Join room
+                              </button>
+                            ) : null}
+                            {appointment.status === 'confirmed' ? (
+                              <button
+                                type="button"
+                                className="ghost-button"
+                                onClick={() => updateStatus(appointment.id, 'live')}
+                              >
+                                Mark live
+                              </button>
+                            ) : null}
+                            {appointment.status === 'live' ? (
+                              <button
+                                type="button"
+                                className="ghost-button"
+                                onClick={() => updateStatus(appointment.id, 'completed')}
+                              >
+                                Complete
+                              </button>
+                            ) : null}
+                          </div>
+                        </article>
+                      ))
+                  ) : (
+                    <EmptyState
+                      title={`No ${column.label.toLowerCase()} appointments`}
+                      detail="New patient requests will appear here once someone books a slot."
+                    />
+                  )}
                 </div>
               </div>
             ))}
@@ -194,13 +201,20 @@ export function DoctorDashboard({ token }) {
           </form>
 
           <div className="mini-list">
-            {data.slots.slice(0, 6).map((slot) => (
-              <article key={slot.id} className="mini-card">
-                <strong>{formatDateTime(slot.starts_at)}</strong>
-                <p>{slot.label || 'Consult slot'}</p>
-                <StatusPill value={slot.status} />
-              </article>
-            ))}
+            {data.slots.length ? (
+              data.slots.slice(0, 6).map((slot) => (
+                <article key={slot.id} className="mini-card">
+                  <strong>{formatDateTime(slot.starts_at)}</strong>
+                  <p>{slot.label || 'Consult slot'}</p>
+                  <StatusPill value={slot.status} />
+                </article>
+              ))
+            ) : (
+              <EmptyState
+                title="No availability yet"
+                detail="Create the first slot here and patients will be able to book it."
+              />
+            )}
           </div>
         </section>
 
@@ -212,23 +226,30 @@ export function DoctorDashboard({ token }) {
             </div>
           </div>
           <div className="innovation-list">
-            {data.appointments
-              .slice()
-              .sort((left, right) => right.triage_score - left.triage_score)
-              .map((appointment) => (
-                <article key={appointment.id} className="innovation-card">
-                  <div className="row-between">
-                    <strong>{appointment.patient.user_profile.display_name}</strong>
-                    <span className="score-pill">{appointment.triage_score}</span>
-                  </div>
-                  <p>{appointment.copilot_summary}</p>
-                  <ul>
-                    {appointment.copilot_checklist.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
+            {data.appointments.length ? (
+              data.appointments
+                .slice()
+                .sort((left, right) => right.triage_score - left.triage_score)
+                .map((appointment) => (
+                  <article key={appointment.id} className="innovation-card">
+                    <div className="row-between">
+                      <strong>{appointment.patient.user_profile.display_name}</strong>
+                      <span className="score-pill">{appointment.triage_score}</span>
+                    </div>
+                    <p>{appointment.copilot_summary}</p>
+                    <ul>
+                      {appointment.copilot_checklist.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </article>
+                ))
+            ) : (
+              <EmptyState
+                title="No smart briefs yet"
+                detail="Once a patient submits symptoms and books a visit, PulseMatch summaries will show here."
+              />
+            )}
           </div>
         </section>
       </section>

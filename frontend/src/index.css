@@ -700,6 +700,24 @@ ul {
   box-shadow: var(--shadow-soft);
 }
 
+.empty-state {
+  padding: 1rem 1.05rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px dashed rgba(44, 115, 145, 0.18);
+}
+
+.empty-state strong {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+}
+
+.empty-state p {
+  margin-top: 0.4rem;
+  color: var(--muted);
+}
+
 @media (max-width: 1440px) {
   .kanban-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

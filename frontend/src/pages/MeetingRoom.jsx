@@ -63,12 +63,23 @@ export function MeetingRoom({ token, session }) {
       }
     }
 
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => peer.addTrack(track, localStreamRef.current))
-    }
-
     peerRef.current = peer
     return peer
+  }
+
+  function attachLocalTracks(peer, stream) {
+    const existingTrackIds = new Set(
+      peer
+        .getSenders()
+        .map((sender) => sender.track?.id)
+        .filter(Boolean),
+    )
+
+    stream.getTracks().forEach((track) => {
+      if (!existingTrackIds.has(track.id)) {
+        peer.addTrack(track, stream)
+      }
+    })
   }
 
   async function flushPendingCandidates(peer) {
@@ -91,7 +102,7 @@ export function MeetingRoom({ token, session }) {
     }
 
     const peer = ensurePeerConnection()
-    stream.getTracks().forEach((track) => peer.addTrack(track, stream))
+    attachLocalTracks(peer, stream)
     setMediaReady(true)
     setActivity('Camera and microphone are ready.')
     await sendSignal('ready', { role: session.user.role })
@@ -198,7 +209,7 @@ export function MeetingRoom({ token, session }) {
   })
 
   useEffect(() => {
-    if (!appointment) {
+    if (!appointmentId || !token) {
       return undefined
     }
 
@@ -230,7 +241,7 @@ export function MeetingRoom({ token, session }) {
       window.clearInterval(intervalId)
       cleanupRoom()
     }
-  }, [appointment, appointmentId, token])
+  }, [appointmentId, token])
 
   if (loading && !appointment) {
     return <SplashScreen />
@@ -280,7 +291,7 @@ export function MeetingRoom({ token, session }) {
               </button>
             ) : (
               <button type="button" className="primary-button" onClick={enableMedia}>
-                Join ready
+                Ready to join
               </button>
             )}
             <button type="button" className="ghost-button" onClick={() => teardownCall(true)}>

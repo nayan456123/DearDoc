@@ -180,7 +180,7 @@ npm --prefix frontend install
 npm run migrate
 ```
 
-### 4. Seed demo users and appointments
+### 4. Seed demo accounts
 
 ```powershell
 npm run seed
@@ -226,7 +226,7 @@ Frontend:
 6. Open the same meeting from both sides
 7. Allow camera and microphone access in both browsers
 8. Doctor clicks `Launch call`
-9. Patient clicks `Enable camera` / joins ready
+9. Patient clicks `Enable camera` or `Ready to join`
 10. Verify that both local and remote video streams connect
 
 ## Do You Need Hosting To Test This?
@@ -257,7 +257,9 @@ The current version is intentionally optimized for local-first demo testing.
 From the repo root:
 
 - `npm run backend`
+- `npm run backend:lan`
 - `npm run frontend`
+- `npm run frontend:lan`
 - `npm run migrate`
 - `npm run seed`
 - `npm run test:backend`
@@ -280,3 +282,24 @@ npm --prefix frontend run build
 - `backend/db.sqlite3` is ignored so the repo stays fresh
 - the current WebRTC implementation is for demo/local validation first
 - the doctor is the main operator inside the product, so there is no extra admin product surface
+
+## Same Wi-Fi Testing
+
+You can open the app from another device on the same Wi-Fi network without hosting it.
+
+Run:
+
+```powershell
+npm run backend:lan
+npm run frontend:lan
+```
+
+Then open the Vite URL using your computer's local IP, for example:
+
+`http://192.168.1.5:5173`
+
+Notes:
+
+- dashboards, login, slot creation, booking, and signaling should work on the same Wi-Fi
+- camera and microphone access on another device may fail on some browsers because `getUserMedia` usually prefers `localhost` or HTTPS
+- for reliable remote WebRTC testing across devices, HTTPS and a stronger deployment setup are still better
